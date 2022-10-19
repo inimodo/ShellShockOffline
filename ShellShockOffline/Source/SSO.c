@@ -4,9 +4,10 @@
 _CCD_ALIASCOLOR		c_under = { 200, 255, 255 };
 _CCD_ALIASCOLOR		c_debug = { 1, 255, 155 };
 
-#define DEBUGGER
+//#define DEBUGGER
+
 //PHYSIK
-#define _P_TIMESCALE	10
+#define _P_TIMESCALE	30
 #define _P_POWERSCALE	0.5f
 
 //SHOOTING
@@ -23,7 +24,7 @@ _CCD_ALIASCOLOR		c_debug = { 1, 255, 155 };
 #define _P_TANK_H		5
 #define _P_DEF_STRETCH	50
 #define _P_MIN_HEIGTH	300
-#define _P_SHELLOFFSET	20
+#define _P_SHELLOFFSET	30
 
 #define _P_DEF_SCATTER	(_CCD_DATA_DEF)(_CCD_WINDOW_WIDTH/_P_DEF_STRETCH)
 #define _P_GRAVITY		(_CCD_DATA_FLOAT)(9.81f)
@@ -65,10 +66,10 @@ void render_lines()
 		else
 			_CCD_DRAWLINE(&c_canvas, v_lines[ui_i], (_CCD_ALIASVECTOR) { _CCD_WINDOW_WIDTH, v_lines[0].Y }, c_line);
 #ifdef DEBUGGER
-		//if (ui_i != _P_DEF_STRETCH - 1)
-		//_CCD_DRAWRECT(&c_canvas, v_lines[ui_i], v_lines[ui_i + 1], c_debug, _CCD_DM_OUTLINE);
-		//else
-		//_CCD_DRAWRECT(&c_canvas, v_lines[ui_i], (_CCD_ALIASVECTOR){ _CCD_WINDOW_WIDTH, v_lines[0].Y }, c_debug, _CCD_DM_OUTLINE);
+		if (ui_i != _P_DEF_STRETCH - 1)
+		_CCD_DRAWRECT(&c_canvas, v_lines[ui_i], v_lines[ui_i + 1], c_debug, _CCD_DM_OUTLINE);
+		else
+		_CCD_DRAWRECT(&c_canvas, v_lines[ui_i], (_CCD_ALIASVECTOR){ _CCD_WINDOW_WIDTH, v_lines[0].Y }, c_debug, _CCD_DM_OUTLINE);
 
 #endif
 	}

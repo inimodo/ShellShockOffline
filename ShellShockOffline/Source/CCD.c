@@ -202,60 +202,6 @@ void _CCD_SETPIXEL(_CCD_ALIAS* CCD_CANVAS, _CCD_ALIASVECTOR V_POINT, _CCD_ALIASC
 			return &win;
 		}
 	#endif
-long __stdcall WndProc(_CCD_DATA_HWND hwnd, _CCD_DATA_UINT msg, _CCD_DATA_WPARAM wParam, _CCD_DATA_LPARAM lParam){
-	if(msg == WM_CLOSE)DestroyWindow(hwnd);
-	else if(msg == WM_DESTROY)PostQuitMessage(0);
-	else return DefWindowProc(hwnd, msg, wParam, lParam);
-	return 0;
-}
-int __stdcall WinMain(_CCD_DATA_HINTS hInstance, _CCD_DATA_HINTS hPrevInstance, _CCD_DATA_LPSTR lpCmdLine, int nCmdShow){
-	#ifdef _CCD_SHOWCONSOL
-		AllocConsole();
-		freopen(_CCD_WINDOW_CONSOLE);
-	#endif
-	printf(_CCD_WINDOW_DEFAULT);
-
-
-	_CCD_ALIASWINDOW* win_window = _CCD_STARTUP_F(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
-
-	wc.hbrBackground = (_CCD_DATA_HBRUSH)(win_window->USI_BACKCOLOR); wc.cbSize = sizeof(_CCD_DATA_WNDC);
-	wc.lpfnWndProc = WndProc; wc.hInstance = hInstance; 
-	wc.lpszClassName = _CCD_WINDOW_CLASS; wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
-
-	if (!RegisterClassEx(&wc))return 0;
-
-	hwnd = CreateWindowEx(WS_EX_CLIENTEDGE,_CCD_WINDOW_CLASS,_CCD_WINDOW_WINAME,WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, CW_USEDEFAULT, _CCD_WINDOW_WIDTH, _CCD_WINDOW_HEIGHT,NULL, NULL, hInstance, NULL);
-
-	if (hwnd == NULL)return 0;
-	
-	ShowWindow(hwnd, nCmdShow);
-	UpdateWindow(hwnd);
-	hdc_frame = GetDC(hwnd);
-	if (_CCD_MAIN_F(hwnd) != 0)return 0;	
-	_CCD_DATA_RAT us_switch = 1;
-	_CDD_DATA_TIME t_pasttime= clock();
-	while (GetMessage(&Msg, NULL, 0, 0) > 0){
-
-		#ifdef _CCD_SINGLEFRAME
-		if (ui_frame == 0)
-		#endif 
-		if (_CCD_UPDATE_F(ui_frame, clock() - t_pasttime, Msg) != 0)return 0;
-		t_pasttime = clock();
-		if (us_switch == 1) {
-			TranslateMessage(&Msg);
-			DispatchMessage(&Msg);
-		}
-		ui_frame++;
-		if (GetAsyncKeyState(VK_NUMPAD0) != 0) {
-			us_switch *= -1;
-			Sleep(200);
-		}
-	}
-	_CCD_END_F(Msg.wParam, ui_frame);
-	ReleaseDC(NULL,hdc_frame);
-	return Msg.wParam;
-}
 void _CCD_DRAWBUFFER(_CCD_ALIAS* CCD_CANVAS) {
 	_CCD_DATA_COLR *col_buffer = (_CCD_DATA_COLR*)malloc(CCD_CANVAS->USI_HEIGHT * CCD_CANVAS->USI_WIDTH* sizeof(_CCD_DATA_COLR));
 	for (_CCD_DATA_UINT x = 0, c = 0; x < CCD_CANVAS->USI_HEIGHT; x++)
@@ -352,3 +298,74 @@ void _CCD_DRAWSPRITE(_CCD_ALIAS * CCD_CANVAS, _CCD_SPRITE SPR_SPRITE, _CCD_DATA_
 		}
 }
 #endif 
+
+
+DWORD __stdcall wWinProcess(LPVOID lp_Void)
+{
+	_CDD_DATA_TIME t_pasttime = clock();
+	while (_CCD_UPDATE_F(ui_frame, clock() - t_pasttime, Msg) == 0)
+	{
+		t_pasttime = clock();
+	}
+	_CCD_END_F();
+
+	return 0;
+}
+
+long __stdcall WndProc(_CCD_DATA_HWND hwnd, _CCD_DATA_UINT msg, _CCD_DATA_WPARAM wParam, _CCD_DATA_LPARAM lParam){
+	if(msg == WM_CLOSE)DestroyWindow(hwnd);
+	else if(msg == WM_DESTROY)PostQuitMessage(0);
+	else return DefWindowProc(hwnd, msg, wParam, lParam);
+	return 0;
+}
+
+int __stdcall WinMain(_CCD_DATA_HINTS hInstance, _CCD_DATA_HINTS hPrevInstance, _CCD_DATA_LPSTR lpCmdLine, int nCmdShow){
+	#ifdef _CCD_SHOWCONSOL
+		AllocConsole();
+		freopen(_CCD_WINDOW_CONSOLE);
+	#endif
+	printf(_CCD_WINDOW_DEFAULT);
+
+
+	_CCD_ALIASWINDOW* win_window = _CCD_STARTUP_F(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
+
+	wc.hbrBackground = (_CCD_DATA_HBRUSH)(win_window->USI_BACKCOLOR); wc.cbSize = sizeof(_CCD_DATA_WNDC);
+	wc.lpfnWndProc = WndProc; wc.hInstance = hInstance; 
+	wc.lpszClassName = _CCD_WINDOW_CLASS; wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
+
+	if (!RegisterClassEx(&wc))return 0;
+
+	hwnd = CreateWindowEx(WS_EX_CLIENTEDGE,_CCD_WINDOW_CLASS,_CCD_WINDOW_WINAME,WS_OVERLAPPEDWINDOW,
+		CW_USEDEFAULT, CW_USEDEFAULT, _CCD_WINDOW_WIDTH, _CCD_WINDOW_HEIGHT,NULL, NULL, hInstance, NULL);
+
+	if (hwnd == NULL)return 0;
+	
+	ShowWindow(hwnd, nCmdShow);
+	UpdateWindow(hwnd);
+	hdc_frame = GetDC(hwnd);
+	if (_CCD_MAIN_F(hwnd) != 0)return 0;	
+	_CCD_DATA_RAT us_switch = 1;
+
+
+	HANDLE hwd_Thread = CreateThread(0, 0, wWinProcess, 0, 0, NULL);
+
+	while (GetMessage(&Msg, NULL, 0, 0) > 0){
+
+		#ifdef _CCD_SINGLEFRAME
+		if (ui_frame == 0)
+		#endif 
+		
+		if (us_switch == 1) { // HALTING SWITCH
+			TranslateMessage(&Msg);
+			DispatchMessage(&Msg);
+		}
+		ui_frame++;
+		if (GetAsyncKeyState(VK_NUMPAD0) != 0) {
+			us_switch *= -1;
+			Sleep(200);
+		}
+	}
+	_CCD_END_F(Msg.wParam, ui_frame);
+	ReleaseDC(NULL,hdc_frame);
+	return Msg.wParam;
+}
