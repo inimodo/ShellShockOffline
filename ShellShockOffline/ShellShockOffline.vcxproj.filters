@@ -15,15 +15,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CCD.c">
+    <ClCompile Include="Source\CCD.c">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="main.c">
+    <ClCompile Include="Source\SSO.c">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CCD.h">
+    <ClInclude Include="Source\CCD.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

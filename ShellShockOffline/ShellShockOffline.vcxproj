@@ -115,11 +115,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CCD.c" />
-    <ClCompile Include="main.c" />
+    <ClCompile Include="Source\CCD.c" />
+    <ClCompile Include="Source\SSO.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CCD.h" />
+    <ClInclude Include="Source\CCD.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
